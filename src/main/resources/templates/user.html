@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title></title>
+</head>
+<body>
+
+<div class="container-fluid bg-dark">
+    <nav class="navbar navbar-dark bg-dark">
+    <span>
+    <span class="navbar-brand font-weight-bold" th:text="${user.email}"></span>
+    <span class="navbar-brand"
+          th:text="'with roles: ' + ${user.roles}"></span>
+    </span>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 px-0">
+            <nav class="nav flex-column nav-pills">
+                <a class="nav-link active" href="/admin">User</a>
+            </nav>
+        </div>
+        <div class="col-10 bg-light">
+            <h2>User information-page</h2>
+            <h6>About user</h6>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Age</th>
+                    <th>Email</th>
+                    <th>ROLE</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:test="${user.id}"></td>
+                    <td th:test="${user.firstName}"></td>
+                    <td th:test="${user.lastName}"></td>
+                    <td th:test="${user.age}"></td>
+                    <td th:test="${user.email}"></td>
+                    <td th:test="${user.roles}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
