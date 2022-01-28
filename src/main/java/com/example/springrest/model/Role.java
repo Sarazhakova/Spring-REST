@@ -13,16 +13,16 @@ public class Role implements GrantedAuthority {
     @Column(name = "roles_id", nullable = false)
     private Long id;
 
-    @Column(name = "role")
-    private String role;
+    @Column(name = "name")
+    private String name;
 
     @Transient
     @ManyToMany(mappedBy = "roles")
     private  Set<User> users;
 
-    public Role(String role, Long id) {
+    public Role(String name, Long id) {
         this.id = id;
-        this.role = role;
+        this.name = name;
     }
 
     public Role() {
@@ -38,11 +38,11 @@ public class Role implements GrantedAuthority {
     }
 
     public String getName() {
-        return role;
+        return name;
     }
 
     public void setName(String name) {
-        this.role = name;
+        this.name = name;
     }
 
     public Set<User> getUsers() {

@@ -1,148 +1,125 @@
-let arrUsers = []
+$(document).ready(function () {
+    fillAllUsersTable();
+});
 
-const userFetch = {
-    head: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Referer': null
-    },
-    findAllUsers: async () => await fetch('api/admin'),
-    // findOneUser: async (id) => await fetch(`api/admin/${id}`),
-    addNewUser: async (user) => await fetch('api/admin', {method: 'POST', headers: userFetch.head, body: JSON.stringify(user)}),
-    updateUser: async (user, id) => await fetch(`api/admin/${id}`, {method: 'PUT', headers: userFetch.head, body: JSON.stringify(user)}),
-    deleteUser: async (id) => await fetch(`api/admin/${id}`, {method: 'DELETE', headers: userFetch.head})
-}
-
-getAllUsers()
-
-function getAllUsers() {
-    userFetch.findAllUsers().then(res => {
-        console.log(res.statusText + res.status)
-        if (res.ok) {
-            res.json().then(users => {
-                users.forEach(user => {
-                    console.log(user)
-                    addUser(user).then(r => r.json)
-                    arrUsers.push(user)
-                })
-            })
-            console.log(arrUsers)
-        } else {
-            console.error(res.statusText + res.status)
-        }
-    })
-}
-
-async function addUser() {
-    $('#tableAllUsers').click(async () => {
-        let addUserForm = $('#addNewUser')
-        let firstName = addUserForm.find('#newFirstName').val().trim()
-        let lastName = addUserForm.find('#newLastName').val().trim()
-        let age = addUserForm.find('#newAge').val().trim()
-        let email = addUserForm.find('#newEmail').val().trim()
-        let data = {
-            firstName: firstName,
-            lastName: lastName,
-            age: age,
-            email: email
-        }
-        const response = await userFetch.addNewUser(data)
-        if (response.ok) {
-            getAllUsers();
-            addUserForm.find('#newFirstName').val('')
-            addUserForm.find('#newLastName').val('')
-            addUserForm.find('#newAge').val('')
-            addUserForm.find('#newEmail').val('')
-        } else {
-            let body = await response.json()
-            let alert = `<div class="alert alert-danger alert-dismissible fade show col-12" role="alert" id="messageError">
-                            ${body.info}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>`;
-            addUserForm.prepend(alert)
-        }
-    })
-}
-
-async function editUser(id) {
-    userFetch.updateUser(id).then(res => {
-        res.json().then(user => {
-            $('#editID').val(user.id)
-            $('#editFirstName').val(user.firstName)
-            $('#editLastName').val(user.lastName)
-            $('#editAge').val(user.age)
-            $('#editEmail').val(user.email)
-            $('#editRole').val(user.roles)
-            console.log(user)
+$(document).on('click', '#eBtn', function () {
+    $('.editUserModal #editModalID').modal('show')
+    fetch("/api" + $(this).attr('value'))
+        .then((response) => {
+            return response.json();
         })
-    })
-}
+        .then((data) => {
+            $("#editID").val(data.id);
+            $("#editFirstName").val(data.firstName);
+            $("#editLastName").val(data.lastName);
+            $("#editAge").val(data.age);
+            $("#editEmail").val(data.email);
+            $("#editPassword").val(data.password);
+        });
+});
 
-function editButton() {
-    let editUser = {
-        id: document.getElementById('editID').value,
-        firstName: document.getElementById('editFirstName').value,
-        lastName: document.getElementById('editLastName').value,
-        age: document.getElementById('editAge').value,
-        email: document.getElementById('editEmail').value,
-        role: roleList()
+$(document).on('click', '#dBtn', function () {
+    $('.deleteUserModal #deleteModalID').modal('show')
+    fetch("/api" + $(this).attr('value'))
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            $("#deleteId").val(data.id);
+            $("#deleteFirstName").val(data.firstName);
+            $("#deleteLastName").val(data.lastName);
+            $("#deleteAge").val(data.age);
+            $("#deleteEmail").val(data.email);
+        });
+});
+
+$(document).on('click', '#addUserButton', function () {
+    let userRoles = []
+    console.log($('#newRole').val())
+    for(let i = 0; i < $('#newRole').val().length; i++){
+        userRoles.push({role:$('#newRole').val()[i]})
     }
-    console.log(editUser)
-
-    let roleList = () => {
-        let array = []
-        let options = document.querySelector('#editRole').options
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].selected) {
-                let role = {
-                    id: options[i].value,
-                    name: options[i].text
-                }
-                array.push(role)
-            }
-        }
-        return array
+    let user = {
+        name: $('#addFirstName').val(),
+        surname: $('#addLastName').val(),
+        age: $('#addAge').val(),
+        mail: $('#addEmail').val(),
+        password: $('#addPassword').val(),
+        roles: userRoles
     }
+    fetch('/api', {
+        method: 'POST',
+        body: JSON.stringify(user),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(fillAllUsersTable).then($('#usersNav').tab('show'));
+});
 
-    let userEditId = ($('editID').val())
-    console.log(userEditId)
-    userFetch.updateUser(id).then(res => {
-        res.json().then(userEdit => {
-            console.log(userEdit)
-            $('#tableAllUsers').empty()
-            arrUsers.forEach(user => {
-                addUser(user)
-            })
-        })
-        $('#editModal').modal('hide')
-    })
+$(document).on('click', '#editModalButton', function () {
+    let userRoles = []
+    for(let i = 0; i < $('#editRoles').val().length; i++){
+        userRoles.push({role:$('#editRoles').val()[i]})
+    }
+    let user = {
+        id: $('#editID').val(),
+        firstName: $('#editFirstName').val(),
+        lastName: $('#editLastName').val(),
+        age: $('#editAge').val(),
+        mail: $('#editEmail').val(),
+        password: $('#editPassword').val(),
+        roles: userRoles
+    }
+    fetch('/api', {
+        method: 'PUT',
+        body: JSON.stringify(user),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(fillAllUsersTable);
+});
+
+$(document).on('click', '#deleteModalButton', function () {
+    fetch('/api/' + $("#deleteId").val(), {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(fillAllUsersTable).then($('.deleteUserModal #deleteModalID').modal('hide'));
+});
+
+function fillAllUsersTable() {
+    let allUsersTable = $("#allUsersTable")
+    allUsersTable.children().remove();
+    fetch("/api")
+        .then((response) => {
+            response.json().then(data => data.forEach(function (user) {
+                let TableRow = createTableRow(user);
+                allUsersTable.append(TableRow);
+
+            }));
+        }).catch(error => {
+        console.log(error);
+    });
 }
 
-function deleteUserById(id) {
-    userFetch.deleteUser(id).then(res => {
-        res.json().then(user => {
-            $('#deleteID').val(user.id)
-            $('#deleteFirstName').val(user.firstName)
-            $('#deleteLastName').val(user.lastName)
-            $('#deleteAge').val(user.age)
-            $('#deleteEmail').val(user.email)
-            $('#deleteRole').val(user.roles)
-        })
-    })
-}
-
-function deleteButton() {
-    let userId = ($('#deleteId').val())
-    console.log(userId)
-    userFetch.deleteUser(id).then(res => {
-        $('#tableAllUsers').empty()
-        arrUsers = arrUsers.filter(user => user.id !== Number(userId))
-        console.log(arrUsers)
-        arrUsers.forEach(user => {
-            addUser(user)
-        })
-        $('deleteModal').modal('hide')
-    })
+function createTableRow(u) {
+    let userRole = "";
+    for (let i = 0; i < u.roles.length; i++) {
+        userRole += u.roles[i].role?.substring(5) + " ";
+    }
+    return `<tr id="user_table_row">
+            <td>${u.id}</td>
+            <td>${u.firstName}</td>
+            <td>${u.lastName}</td>
+            <td>${u.age}</td>
+            <td>${u.mail}</td>
+            <td>${userRole}</td>
+            <td>
+            <button type="button" id="eBtn" value="${u.id}" class="btn btn-info text-white">Edit</button>
+            </td>
+            <td>
+            <button type="button" id="dBtn" value="${u.id}" class="btn btn-danger">Delete</button>
+            </td>
+        </tr>`;
 }
